@@ -1,0 +1,30 @@
+1.httpie post 註冊帳號
+
+http POST http://localhost:8080/api/user/createUser employee=1151159 username=deeyo password=deeyo0312 email=deeyo0312@gmail.com level=normal
+
+2.httpie post 新增glass data
+
+http POST http://localhost:8080/api/fmatable/glassData line=R1 date=2025-04-23 product=B140HAN01 gid=GXX40010005 runder=1 gunder=6 rwp=3 employee=1151159 "Authorization:JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZSI6IjExNTExNTkiLCJwYXNzd29yZCI6IiQyYiQxMCQ5T0JzVi5GUWl1UHJKRXR5bTVnazRlQVhrL1JmNUt5TkpKbmEzVUVSU2dWWDdaenpIZEFqMiIsImlhdCI6MTc0NTM5NDYzNn0.MjGSjScEq151O5ieyNKz82yqb8SrMHS1r1Xh_VMXji0"
+
+3.httpie get 用工號查巡所有glassData
+
+http GET http://localhost:8080/api/fmatable/1151159/2025-04-23/R1/B140HAN01 "Authorization:JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZSI6IjExNTExNTkiLCJwYXNzd29yZCI6IiQyYiQxMCQ5T0JzVi5GUWl1UHJKRXR5bTVnazRlQVhrL1JmNUt5TkpKbmEzVUVSU2dWWDdaenpIZEFqMiIsImlhdCI6MTc0NTM5NDYzNn0.MjGSjScEq151O5ieyNKz82yqb8SrMHS1r1Xh_VMXji0"
+
+
+4.log in
+
+http POST http://localhost:8080/api/user/login employee=1151159 password=deeyo0312
+
+5.用工號跟日期查詢glass fma data
+
+http GET http://localhost:8080/api/fmatable/1151159/2025-04-10 "Authorization:JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZSI6IjExNTExNTkiLCJwYXNzd29yZCI6IiQyYiQxMCRsbU05Z25RbUJ3em0uT3AuT1VWMzcubVI3N1ZaSVhaa0dicVlIUTJIVDlLaHV0cGtETk9UdSIsImlhdCI6MTc0NDg2MTg4M30.Q9fVhH9z62ZPyD0EiPVCMdMB2YUTECwbMUXhC_ziZOE"
+
+0952104, stanely
+1151159, deeyo0312
+1044208, hhsish
+
+
+
+http POST http://localhost:8080/api/user/createUser employee=0952104 username=stanely password=stanely email=stanely@gmail.com level=normal
+
+
