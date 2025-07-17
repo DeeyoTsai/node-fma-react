@@ -31,54 +31,54 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
 
             <div className="collapse navbar-collapse" id="navbarNav">
               <ul className="navbar-nav">
-                <li className="nav-item">
+                <li className="nav-item me-2">
                   <Link className="nav-link" to="/">
-                    首頁
+                    <h5>首頁</h5>
                   </Link>
                 </li>
                 {!currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link className="nav-link" to="/register">
-                      註冊帳號
+                      <h5>註冊帳號</h5>
                     </Link>
                   </li>
                 )}
                 {!currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link className="nav-link" to="/login">
-                      登入帳號
+                      <h5>登入帳號</h5>
                     </Link>
                   </li>
                 )}
                 {currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link
                       onClick={handleLogout}
                       className="nav-link"
                       to="/login"
                     >
-                      登出
+                      <h5>登出</h5>
                     </Link>
                   </li>
                 )}
                 {currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link className="nav-link" to="/profile">
-                      個人頁面
+                      <h5>個人頁面</h5>
                     </Link>
                   </li>
                 )}
                 {currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link className="nav-link" to="/fmaquery">
-                      FMA記錄查詢
+                      <h5>FMA記錄查詢</h5>
                     </Link>
                   </li>
                 )}
                 {currentUser && (
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
                     <Link className="nav-link" to="/fmatable">
-                      FMA填寫表格
+                      <h5>FMA填寫表格</h5>
                     </Link>
                   </li>
                 )}

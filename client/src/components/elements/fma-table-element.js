@@ -1,29 +1,26 @@
-import React, { useState, useEffect, useRef, use, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 // import { IconName } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
 import "../css/fma-table-element.css";
 // import { data } from "react-router-dom";
 
 const FmaTableElement = (props) => {
+  let initObj = {
+    id: "",
+    date: "",
+    gid: "",
+  };
+  props.defectArr.map((e, i) => (initObj[e.replaceAll("-", "")] = ""));
+  initObj["s"] = "";
+  initObj["m"] = "";
+  initObj["l"] = "";
+  initObj["createdAt"] = "";
+  initObj["updatedAt"] = "";
+  initObj["outlineId"] = "";
+
   const initTableData = () => {
     let initArr = [];
     for (let i = 0; i < props.standardRowNum; i++) {
-      let initObj = {
-        id: "",
-        date: "",
-        gid: "",
-      };
-      props.defectArr.map((e, i) => {
-        // console.log(e);
-        e = e.replaceAll("-", "");
-        initObj[e] = "";
-      });
-      initObj["s"] = "";
-      initObj["m"] = "";
-      initObj["l"] = "";
-      initObj["createdAt"] = "";
-      initObj["updatedAt"] = "";
-      initObj["outlineId"] = "";
       // console.log(Object.keys(initObj).length);
       initArr.push(initObj);
     }
@@ -40,39 +37,45 @@ const FmaTableElement = (props) => {
 
   let [tableData, setTableData] = useState(initTableData);
   // setTableData(initTableData());
-  let tableDataRef = useRef([]);
+  let tableDataRef = useRef(tableData);
   // let [selectPos, setSelectPos] = useState(0);
   let savedPosRef = useRef(null);
 
   const handleRowDelete = (e) => {
+    // e.currentTarget.parentElement.parentElement.remove();
+    const del_row_id = Number(
+      e.currentTarget.parentElement.parentElement.id.split("-")[2]
+    );
+    tableData.splice(del_row_id, 1);
+    console.log(tableData);
     e.currentTarget.parentElement.parentElement.remove();
-    setItems();
+    // setItems();
   };
 
   // 設定FMA Result Item number
-  function setItems() {
-    let allItems = document.querySelectorAll(".item");
-    // console.log(allItems);
-    allItems.forEach((item, index) => {
-      item.innerHTML = index + 1;
-    });
-  }
+  // function setItems() {
+  //   let allItems = document.querySelectorAll(".item");
+  //   console.log(allItems);
+  //   allItems.forEach((item, index) => {
+  //     item.innerHTML = index + 1;
+  //   });
+  // }
 
   function sumArr(arr) {
     return arr.reduce((acc, cur) => acc + cur, 0.0);
   }
 
   // Create a python range like function
-  function Range(size, startNum = 0) {
-    return [...Array(size).keys()].filter((i) => i >= startNum);
-  }
+  // function Range(size, startNum = 0) {
+  //   return [...Array(size).keys()].filter((i) => i >= startNum);
+  // }
   // 取得產品欄位(glass id)不為空白的列數
   function getNotEmptyRowLen() {
     let countNotEmptyRows = 0;
     let notEmptyGidRows = document.querySelectorAll(".gid");
     notEmptyGidRows.forEach((row) => {
       let gid_row_value = row.innerHTML.replace(/[<]br[^>]*[>]/gi, "");
-      if (gid_row_value != "") {
+      if (gid_row_value !== "") {
         countNotEmptyRows += 1;
       }
     });
@@ -98,7 +101,7 @@ const FmaTableElement = (props) => {
     const smlArr = ["s", "m", "l"];
 
     tableData.map((e, i) => {
-      if (item == i) {
+      if (item === i) {
         let rowCount = 0;
         smlArr.map((s, i) => {
           rowCount += Number(e?.[s]);
@@ -157,17 +160,22 @@ const FmaTableElement = (props) => {
   }, [savedPosRef.current]);
 
   useEffect(() => {
-    // setTableData(props.glassDataSet);
     if (props.glassDataSet) {
       // 僅初始化將僅初始化將glassDataSet帶入TableData
-      if (tableData.length == 0) {
-        setTableData(props.glassDataSet);
-        tableDataRef.current = props.glassDataSet;
-      }
+      // if (tableData.length === 0) {
+      setTableData(props.glassDataSet);
+      tableDataRef.current = props.glassDataSet;
+      // }
     }
-    // console.log(tableData);
+    // 處理新增項次
+    if (tableDataRef.current.length < props.standardRowNum) {
+      tableDataRef.current.push(initObj);
+    }
+    console.log(tableData);
+    console.log(tableData);
+
     // 設定項次編號
-    setItems();
+    // setItems();
     let totalNumArr = [];
     let avgNumArr = [];
     let ratioNumArr = [];
@@ -206,7 +214,7 @@ const FmaTableElement = (props) => {
       accRatioNumArr.push(accRatio);
     }, 0.0);
     setAccRatioNum(accRatioNumArr);
-  }, [props.glassDataSet, tableData]);
+  }, [props.glassDataSet, tableData, props.standardRowNum]);
 
   return (
     <div className="fma-result-input">
@@ -287,13 +295,15 @@ const FmaTableElement = (props) => {
           {(() => {
             // const standardRowNum = 5;
             const listItems = [];
-            for (let i = 0; i < props.standardRowNum; i++) {
+            for (let i = 0; i < tableData.length; i++) {
               let row_id = "df-row-";
               row_id = row_id + `${i}`;
               // let rowItem = [];
+              // console.log(tableData);
+
               listItems.push(
                 <tr className="df-row" key={i} id={row_id}>
-                  <td className="item"></td>
+                  <td className="item">{i + 1}</td>
                   <td
                     className="gid edit-color"
                     suppressContentEditableWarning
@@ -513,7 +523,7 @@ const FmaTableElement = (props) => {
                   {(() => {
                     let itemList = [];
                     tableData.forEach((e, id) => {
-                      if (id == i) {
+                      if (id === i) {
                         let dfRowArr = [];
                         let dfCount = 0;
                         for (let j = 0; j < props.defectArr.length; j++) {

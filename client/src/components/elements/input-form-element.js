@@ -59,6 +59,7 @@ const QueryFormComponent = (props) => {
   };
   const handleAddItem = () => {
     setStandardRowNum((standardRowNum += 1));
+    // console.log(standardRowNum);
   };
   const handleSubmitBtnEvent = async () => {
     let fmaTable = document.querySelectorAll(".df-row");
@@ -66,7 +67,7 @@ const QueryFormComponent = (props) => {
     let glassDataSet = [];
     let outlineId;
     let outlineSaveErr = "";
-    if (props.line == "" || props.product == "") {
+    if (props.line === "" || props.product === "") {
       window.alert("產線 & 品名為必填，欄位不可為空!");
     } else {
       // 送出fma Outline，包含前三大defect、送出時間 ==> outline data
@@ -122,7 +123,7 @@ const QueryFormComponent = (props) => {
           const rowSml = rowArr.splice(3, 6).map(Number);
           let rowDfCountObj = {};
           let rowSmlObj = {};
-          props.defectArr.map((e, i) => {
+          props.defectArr.foreach((e, i) => {
             e = e.split("-").join("");
             rowDfCountObj[e] = rowDfCount[i];
           });
@@ -154,7 +155,7 @@ const QueryFormComponent = (props) => {
       });
       try {
         await FmaService.addGlasses(props.employee, glassDataSet);
-        if (messageRef.current == "") {
+        if (messageRef.current === "") {
           window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");
           navigate("/fmaquery");
         }
