@@ -22,7 +22,9 @@ const FmaTableElement = (props) => {
     let initArr = [];
     for (let i = 0; i < props.standardRowNum; i++) {
       // console.log(Object.keys(initObj).length);
-      initArr.push(initObj);
+      let cpObj = { ...initObj };
+      cpObj.id = i;
+      initArr.push(cpObj);
     }
     return initArr;
   };
@@ -36,20 +38,41 @@ const FmaTableElement = (props) => {
   const [accRatioNum, setAccRatioNum] = useState([]);
 
   let [tableData, setTableData] = useState(initTableData);
-  // setTableData(initTableData());
   let tableDataRef = useRef(tableData);
   // let [selectPos, setSelectPos] = useState(0);
   let savedPosRef = useRef(null);
 
   const handleRowDelete = (e) => {
-    // e.currentTarget.parentElement.parentElement.remove();
+    console.log(props.standardRowNum);
+
+    props.setStandardRowNum((prev) => {
+      return (prev = prev - 1);
+      // console.log(prev);
+    });
+    console.log(props.standardRowNum);
     const del_row_id = Number(
       e.currentTarget.parentElement.parentElement.id.split("-")[2]
     );
-    tableData.splice(del_row_id, 1);
-    console.log(tableData);
-    e.currentTarget.parentElement.parentElement.remove();
-    // setItems();
+    console.log(del_row_id);
+
+    setTableData((prev) => {
+      // 濾除掉已刪除的欄位
+      prev = prev.filter((e) => e.id !== del_row_id);
+      // console.log(tableData);
+
+      // prev.splice(del_row_id, 1);
+      console.log(tableDataRef.current);
+      // tableDataRef.current = prev.splice(del_row_id, 1);
+      // console.log(tableDataRef.current);
+
+      // 重設tableData id編號
+      tableDataRef.current = prev.map((item, index) => {
+        let cpItem = { ...item };
+        cpItem.id = index;
+        return cpItem;
+      });
+      return tableDataRef.current;
+    });
   };
 
   // 設定FMA Result Item number
@@ -160,22 +183,35 @@ const FmaTableElement = (props) => {
   }, [savedPosRef.current]);
 
   useEffect(() => {
-    if (props.glassDataSet) {
-      // 僅初始化將僅初始化將glassDataSet帶入TableData
-      // if (tableData.length === 0) {
+    if (props.glassDataSet && tableData.length === 0) {
+      // 僅初始化將glassDataSet帶入TableData
       setTableData(props.glassDataSet);
       tableDataRef.current = props.glassDataSet;
-      // }
+      // 重設tableData id編號
+      setTableData((prev) => {
+        // 重設tableData id編號
+        tableDataRef.current = prev.map((item, index) => {
+          let cpItem = { ...item };
+          cpItem.id = index;
+          return cpItem;
+        });
+        return tableDataRef.current;
+      });
     }
+    // tableData內資料變更時，回寫glassDataSet，for query網頁資料更新
+    if (props.glassDataSet) {
+      props.setGlassDataSet(tableDataRef.current);
+    }
+
     // 處理新增項次
     if (tableDataRef.current.length < props.standardRowNum) {
-      tableDataRef.current.push(initObj);
+      let cpObj = { ...initObj };
+      cpObj.id = tableDataRef.current.length;
+      tableDataRef.current.push(cpObj);
+      setTableData(tableDataRef.current);
     }
-    console.log(tableData);
-    console.log(tableData);
 
-    // 設定項次編號
-    // setItems();
+    // 計算Total Num, Avg Num, rario, acc-ratio
     let totalNumArr = [];
     let avgNumArr = [];
     let ratioNumArr = [];
@@ -298,8 +334,6 @@ const FmaTableElement = (props) => {
             for (let i = 0; i < tableData.length; i++) {
               let row_id = "df-row-";
               row_id = row_id + `${i}`;
-              // let rowItem = [];
-              // console.log(tableData);
 
               listItems.push(
                 <tr className="df-row" key={i} id={row_id}>

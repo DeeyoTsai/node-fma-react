@@ -123,7 +123,7 @@ const QueryFormComponent = (props) => {
           const rowSml = rowArr.splice(3, 6).map(Number);
           let rowDfCountObj = {};
           let rowSmlObj = {};
-          props.defectArr.foreach((e, i) => {
+          props.defectArr.map((e, i) => {
             e = e.split("-").join("");
             rowDfCountObj[e] = rowDfCount[i];
           });

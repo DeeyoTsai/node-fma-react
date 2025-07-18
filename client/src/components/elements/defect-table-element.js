@@ -68,7 +68,7 @@ const DefectTableElement = (props) => {
   // );
 
   useEffect(() => {
-    console.log(rowData);
+    // console.log(rowData);
     if (props.glassDataSet) {
       setRowData(props.glassDataSet);
     }

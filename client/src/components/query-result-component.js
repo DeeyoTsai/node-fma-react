@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import FmaTableElement from "./elements/fma-table-element";
 import FmaEchartElement from "./elements/fma-echart-element";
@@ -27,6 +27,8 @@ const QueryResultComponent = (props) => {
   let [dfRatioForLine, setDfRatioForLine] = useState([]);
   let [sortedDfArr, setSortedDfArr] = useState([]);
   // console.log(JSON.parse(rowData).data.foundData[id]);
+  let [standardRowNum, setStandardRowNum] = useState(0);
+
   const handleEmp = (e) => {
     setEmp(e.target.value);
   };
@@ -38,6 +40,11 @@ const QueryResultComponent = (props) => {
   };
   const handleReadOnly = () => {
     isReadyOnly ? setIsReadyOnly(false) : setIsReadyOnly(true);
+  };
+
+  const handleSubmit = () => {
+    // const submitData =
+    console.log(glassDataSet);
   };
 
   const handleBackQuery = () => {
@@ -64,6 +71,10 @@ const QueryResultComponent = (props) => {
     const fetchFmatbData = async () => {
       const data = (await fmaService.queryByOutlineId(id)).data.foundData;
       setGlassDataSet(data);
+      setStandardRowNum(data.length);
+      // console.log(data);
+
+      // setStandardRowNum()
     };
     fetchOutlineData();
     fetchFmatbData();
@@ -71,8 +82,6 @@ const QueryResultComponent = (props) => {
 
   return (
     <div>
-      {/* {rowData.data.foundData} */}
-      {/* <div>{id}</div> */}
       {/* {JSON.stringify(props.currentUser)} */}
       <div className="fma-check-detail" style={{ padding: "2.5rem" }}>
         <div className="card text-center">
@@ -183,7 +192,7 @@ const QueryResultComponent = (props) => {
               {/* <div className="d-flex w-50 justify-content-start"> */}
               <button
                 className="btn btn-info btn col-sm-1 me-2"
-                // onClick={handleQuery}
+                onClick={handleSubmit}
               >
                 <span>確認送出</span>
               </button>
@@ -207,13 +216,15 @@ const QueryResultComponent = (props) => {
               setLine={setLine}
               product={product}
               setProduct={setProduct}
-              standardRowNum={glassDataSet.length}
+              standardRowNum={standardRowNum}
+              setStandardRowNum={setStandardRowNum}
               dfAvgForBar={dfAvgForBar}
               setDfAvgForBar={setDfAvgForBar}
               dfRatioForLine={dfRatioForLine}
               setDfRatioForLine={setDfRatioForLine}
               defectArr={props.defectArr}
               glassDataSet={glassDataSet}
+              setGlassDataSet={setGlassDataSet}
               editable={isReadyOnly}
             />
           </div>
