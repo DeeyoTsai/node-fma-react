@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.css";
+import "react-calendar/dist/Calendar.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Layout from "./components/Layout";
@@ -10,7 +11,7 @@ import AuthService from "./services/auth.service";
 import FmaQueryComponent from "./components/fma-query-component";
 import FmaTableComponent from "./components/fma-table-component";
 import QueryResultComponent from "./components/query-result-component";
-
+// import "react-calendar/dist/Calendar.css";
 function App() {
   let [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser());
   const defectArr = [

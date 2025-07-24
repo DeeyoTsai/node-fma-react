@@ -6,6 +6,7 @@ import DefectTableElement from "./defect-table-element";
 import FmaService from "../../services/fma.service";
 import { useNavigate } from "react-router-dom";
 import fmaService from "../../services/fma.service";
+import FmaTextareaElement from "./fma-textarea-element";
 
 const QueryFormComponent = (props) => {
   const navigate = useNavigate();
@@ -265,6 +266,7 @@ const QueryFormComponent = (props) => {
             setDfRatioForLine={setDfRatioForLine}
             defectArr={props.defectArr}
           />
+          <FmaTextareaElement />
         </div>
         <div className="card-footer">
           <div className="d-flex justify-content-center m-1">
