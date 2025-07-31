@@ -35,9 +35,9 @@ const HomeComponent = () => {
         <div className="outline-table mb-4">
           <DashboardOutlineTable />
         </div>
-        <div className="outline-bar mb-4">
+        {/* <div className="outline-bar mb-4">
           <BasicBars />
-        </div>
+        </div> */}
         <div className="outline-donut">
           <div className="row">
             <div className="col">
@@ -63,9 +63,9 @@ const HomeComponent = () => {
             </div> */}
           </div>
         </div>
-        {/* <div className="outline-bar">
+        <div className="outline-bar mt-4">
           <BasicBars />
-        </div> */}
+        </div>
         <footer className="pt-3 mt-4 text-muted border-top">
           &copy; 2025 Deeyo Tsai
         </footer>

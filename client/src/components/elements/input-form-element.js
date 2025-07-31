@@ -38,6 +38,7 @@ const QueryFormComponent = (props) => {
   // ];
 
   let [standardRowNum, setStandardRowNum] = useState(5);
+  let [othersColSpan, setOthersColSpan] = useState(5);
   // For barChart --> all Total Num data
   let [dfAvgForBar, setDfAvgForBar] = useState([]);
   // For lineChart --> all Avg Num data
@@ -169,6 +170,10 @@ const QueryFormComponent = (props) => {
       }
     }
   };
+  const handleAddCol = () => {
+    setOthersColSpan((othersColSpan += 1));
+    console.log(othersColSpan);
+  };
 
   return (
     <div className="fma-data-query" style={{ padding: "2.5rem" }}>
@@ -260,6 +265,8 @@ const QueryFormComponent = (props) => {
             setProduct={props.setProduct}
             standardRowNum={standardRowNum}
             setStandardRowNum={setStandardRowNum}
+            othersColSpan={othersColSpan}
+            setOthersColSpan={setOthersColSpan}
             dfAvgForBar={dfAvgForBar}
             setDfAvgForBar={setDfAvgForBar}
             dfRatioForLine={dfRatioForLine}
@@ -272,12 +279,18 @@ const QueryFormComponent = (props) => {
           <div className="d-flex justify-content-center m-1">
             <button
               type="button"
-              className="btn btn-secondary me-5 p-2"
+              className="btn btn-secondary me-3 p-2"
               onClick={handleAddItem}
             >
-              新增項次
+              <span>新增項次</span>
             </button>
-            <button className="btn btn-primary" onClick={handleSubmitBtnEvent}>
+            <button className="btn btn-success me-3 p-2" onClick={handleAddCol}>
+              <span>新增欄位</span>
+            </button>
+            <button
+              className="btn btn-primary p-2"
+              onClick={handleSubmitBtnEvent}
+            >
               <span>送出表單</span>
             </button>
           </div>

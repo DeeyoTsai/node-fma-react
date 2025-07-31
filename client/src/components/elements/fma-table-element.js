@@ -145,7 +145,6 @@ const FmaTableElement = (props) => {
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
       if (isNaN(selection.getRangeAt(0).commonAncestorContainer.data)) {
-        // console.log("nan");
         savedPosRef.current = 0;
       } else {
         // savedPosRef.current = selection.getRangeAt(0).startOffset;
@@ -251,6 +250,19 @@ const FmaTableElement = (props) => {
     }, 0.0);
     setAccRatioNum(accRatioNumArr);
   }, [props.glassDataSet, tableData, props.standardRowNum]);
+  // 新增欄位
+  useEffect(() => {
+    console.log(tableData);
+    console.log(tableDataRef.current);
+    for (let i = 0; i < tableDataRef.current.length; i++) {
+      if (props.othersColSpan > 5) {
+        const defaultColName = "selfDefine_" + (props.othersColSpan - 5);
+        tableDataRef.current[i][defaultColName] = "";
+      }
+    }
+    console.log(tableDataRef.current);
+    setTableData(tableDataRef.current);
+  }, [props.othersColSpan]);
 
   return (
     <div className="fma-result-input">
@@ -279,7 +291,7 @@ const FmaTableElement = (props) => {
             <th colSpan="3">顯像不良</th>
             <th colSpan="3">纖維</th>
             <th colSpan="3">前程</th>
-            <th colSpan="5">其他</th>
+            <th colSpan={props.othersColSpan.toString()}>其他</th>
           </tr>
           <tr>
             <th
@@ -330,6 +342,8 @@ const FmaTableElement = (props) => {
           {/* IIF Create default columns */}
           {(() => {
             // const standardRowNum = 5;
+            console.log("123132");
+
             const listItems = [];
             for (let i = 0; i < tableData.length; i++) {
               let row_id = "df-row-";
@@ -554,6 +568,8 @@ const FmaTableElement = (props) => {
                   >
                     {tableData.length > 0 && tableData[i].black}
                   </td>
+
+                  {/* Calculate FMA total */}
                   {(() => {
                     let itemList = [];
                     tableData.forEach((e, id) => {
@@ -576,7 +592,6 @@ const FmaTableElement = (props) => {
                     });
                     return itemList;
                   })()}
-                  {/* </td> */}
                   <td
                     className="s edit-color"
                     suppressContentEditableWarning
@@ -627,6 +642,12 @@ const FmaTableElement = (props) => {
                   </td>
                 </tr>
               );
+              if (props.othersColSpan > 5) {
+                const selfDefArr = Object.keys(tableDataRef.current[0]).filter(
+                  (key) => key.startsWith("selfDefine")
+                );
+                console.log(selfDefArr);
+              }
             }
             return listItems;
           })()}
