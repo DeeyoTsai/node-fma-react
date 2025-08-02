@@ -40,6 +40,14 @@ const FmaTableElement = (props) => {
   let [tableData, setTableData] = useState(initTableData);
   let tableDataRef = useRef(tableData);
   // let [selectPos, setSelectPos] = useState(0);
+  // console.log(Object.keys(tableDataRef.current[0]));
+  // console.log(props.defectArr);
+
+  const tableKeys = Object.keys(tableDataRef.current[0]);
+  const removeDash = props.defectArr.map((x) => x.replaceAll("-", ""));
+  // 取出tableData keys，除了defect type以外的欄位
+  const different = tableKeys.filter((x) => !removeDash.includes(x));
+
   let savedPosRef = useRef(null);
 
   const handleRowDelete = (e) => {
@@ -278,7 +286,9 @@ const FmaTableElement = (props) => {
             <th rowSpan="2" style={{ width: "2vw" }}>
               產品/Glass
             </th>
-            <th colSpan="24">Defect Type</th>
+            <th colSpan={(24 + props.othersColSpan - 5).toString()}>
+              Defect Type
+            </th>
             <th rowSpan="2">FMA Total</th>
             <th colSpan="4" rowSpan="2" className="df-cal">
               Sheet Data
@@ -325,6 +335,20 @@ const FmaTableElement = (props) => {
             <th style={{ width: "2.5vw" }}>髒汙</th>
             <th style={{ width: "2.5vw" }}>Oven液滴</th>
             <th style={{ width: "3.5vw" }}>黑色系</th>
+            {(() => {
+              const itemList = [];
+              const addColNum = props.othersColSpan - 5;
+              for (let i = 0; i < addColNum; i++) {
+                itemList.push(
+                  <th
+                    style={{ width: "2.5vw" }}
+                    className="edit-color"
+                    contentEditable={!props.editable}
+                  ></th>
+                );
+              }
+              return itemList;
+            })()}
             <th style={{ width: "3.5vw" }}>單枚總和</th>
             <th className="df-cal" style={{ width: "3vw" }}>
               S
@@ -568,7 +592,20 @@ const FmaTableElement = (props) => {
                   >
                     {tableData.length > 0 && tableData[i].black}
                   </td>
-
+                  {(() => {
+                    const itemList = [];
+                    const addColNum = props.othersColSpan - 5;
+                    for (let i = 0; i < addColNum; i++) {
+                      itemList.push(
+                        <td
+                          style={{ width: "2.5vw" }}
+                          className="edit-color"
+                          contentEditable={!props.editable}
+                        ></td>
+                      );
+                    }
+                    return itemList;
+                  })()}
                   {/* Calculate FMA total */}
                   {(() => {
                     let itemList = [];
