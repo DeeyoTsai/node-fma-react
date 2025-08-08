@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 // import { IconName } from "react-icons/bs";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaErlang, FaTrashAlt } from "react-icons/fa";
 import "../css/fma-table-element.css";
 // import { data } from "react-router-dom";
 
@@ -10,13 +10,14 @@ const FmaTableElement = (props) => {
     date: "",
     gid: "",
   };
-  props.defectArr.map((e, i) => (initObj[e.replaceAll("-", "")] = ""));
+  props.defectArr.map((e, i) => (initObj[e?.replaceAll("-", "")] = ""));
   initObj["s"] = "";
   initObj["m"] = "";
   initObj["l"] = "";
   initObj["createdAt"] = "";
   initObj["updatedAt"] = "";
   initObj["outlineId"] = "";
+  initObj["otherDf"] = {};
 
   const initTableData = () => {
     let initArr = [];
@@ -29,7 +30,7 @@ const FmaTableElement = (props) => {
     return initArr;
   };
 
-  let RowArr = [];
+  // let RowArr = [];
   let sheetTotal = [];
 
   const [totalNum, setTotalNum] = useState([]);
@@ -39,12 +40,9 @@ const FmaTableElement = (props) => {
 
   let [tableData, setTableData] = useState(initTableData);
   let tableDataRef = useRef(tableData);
-  // let [selectPos, setSelectPos] = useState(0);
-  // console.log(Object.keys(tableDataRef.current[0]));
-  // console.log(props.defectArr);
 
   const tableKeys = Object.keys(tableDataRef.current[0]);
-  const removeDash = props.defectArr.map((x) => x.replaceAll("-", ""));
+  const removeDash = props.defectArr.map((x) => x?.replaceAll("-", ""));
   // 取出tableData keys，除了defect type以外的欄位
   const different = tableKeys.filter((x) => !removeDash.includes(x));
 
@@ -66,8 +64,6 @@ const FmaTableElement = (props) => {
     setTableData((prev) => {
       // 濾除掉已刪除的欄位
       prev = prev.filter((e) => e.id !== del_row_id);
-      // console.log(tableData);
-
       // prev.splice(del_row_id, 1);
       console.log(tableDataRef.current);
       // tableDataRef.current = prev.splice(del_row_id, 1);
@@ -82,15 +78,6 @@ const FmaTableElement = (props) => {
       return tableDataRef.current;
     });
   };
-
-  // 設定FMA Result Item number
-  // function setItems() {
-  //   let allItems = document.querySelectorAll(".item");
-  //   console.log(allItems);
-  //   allItems.forEach((item, index) => {
-  //     item.innerHTML = index + 1;
-  //   });
-  // }
 
   function sumArr(arr) {
     return arr.reduce((acc, cur) => acc + cur, 0.0);
@@ -149,7 +136,7 @@ const FmaTableElement = (props) => {
     return listItems;
   };
 
-  const changeCellValue = (e, i, dfType) => {
+  const changeCellValue = (e, i, dfType, col_n = 0) => {
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
       if (isNaN(selection.getRangeAt(0).commonAncestorContainer.data)) {
@@ -161,13 +148,32 @@ const FmaTableElement = (props) => {
         ).toString().length;
       }
     }
-    setTableData((prevData) => {
-      tableDataRef.current = prevData.map((item, index) =>
-        index === i ? { ...item, [dfType]: Number(e.target.innerText) } : item
-      );
-
-      return tableDataRef.current;
-    });
+    if (dfType !== "otherDf") {
+      setTableData((prevData) => {
+        tableDataRef.current = prevData.map((item, index) =>
+          index === i ? { ...item, [dfType]: Number(e.target.innerText) } : item
+        );
+        return tableDataRef.current;
+      });
+    } else {
+      // 自定義defect type輸入數值後寫入tableData
+      const col_head = `selfDefine_${col_n}`;
+      setTableData((prevData) => {
+        tableDataRef.current = prevData.map((item, index) => {
+          if (index === i) {
+            // let cpObj = { ...item };
+            // 嵌套物件使用深拷貝
+            let cpObj = JSON.parse(JSON.stringify(item));
+            const realDfName = Object.keys(cpObj.otherDf[col_head])[0];
+            cpObj.otherDf[col_head][realDfName] = Number(e.target.innerText);
+            return cpObj;
+          } else {
+            return item;
+          }
+        });
+        return tableDataRef.current;
+      });
+    }
   };
 
   // Handle focus/selection restoration
@@ -223,13 +229,38 @@ const FmaTableElement = (props) => {
     let avgNumArr = [];
     let ratioNumArr = [];
     let accRatioNumArr = [];
+    let defectTypeArr = [];
+    // 新增defect欄位存入defectTypeArr array
+    if (props.othersColSpan > 5) {
+      console.log(Object.values(tableDataRef.current[0].otherDf));
+      Object.values(tableDataRef.current[0].otherDf).map((e) => {
+        defectTypeArr.push(Object.keys(e)[0]);
+        if (
+          !props.defectArr.includes(Object.keys(e)[0]) &&
+          Object.keys(e)[0] !== undefined
+        ) {
+          props.defectArr.push(Object.keys(e)[0]);
+        }
+      });
+    }
+
     for (let j = 0; j < props.defectArr.length; j++) {
       let dfSum = 0;
       let dfAvg = 0.0;
-      let dfType = props.defectArr[j].replaceAll("-", "");
+      let dfType = props.defectArr[j];
       for (let i = 0; i < tableDataRef.current.length; i++) {
-        // console.log(i);
-        dfSum += Number(tableDataRef.current[i][dfType]);
+        if (j < 24) {
+          console.log(props.defectArr.length);
+          dfType = dfType.replaceAll("-", "");
+          dfSum += Number(tableDataRef.current[i][dfType]);
+        } else {
+          // 計算新增欄位的total Num、Avg Num
+          dfSum += Number(
+            tableDataRef.current[i].otherDf[`selfDefine_${j - 23}`][
+              props.defectArr[j]
+            ]
+          );
+        }
         if (getNotEmptyRowLen() > 0) {
           dfAvg = isNaN(dfSum / getNotEmptyRowLen())
             ? 0.0
@@ -239,6 +270,7 @@ const FmaTableElement = (props) => {
       totalNumArr.push(dfSum);
       avgNumArr.push(dfAvg);
     }
+
     // set total num row data and avg num row data
     setTotalNum(totalNumArr);
     setAvgNum(avgNumArr);
@@ -258,17 +290,15 @@ const FmaTableElement = (props) => {
     }, 0.0);
     setAccRatioNum(accRatioNumArr);
   }, [props.glassDataSet, tableData, props.standardRowNum]);
+
   // 新增欄位
   useEffect(() => {
-    console.log(tableData);
-    console.log(tableDataRef.current);
     for (let i = 0; i < tableDataRef.current.length; i++) {
       if (props.othersColSpan > 5) {
         const defaultColName = "selfDefine_" + (props.othersColSpan - 5);
-        tableDataRef.current[i][defaultColName] = "";
+        tableDataRef.current[i]["otherDf"][defaultColName] = {};
       }
     }
-    console.log(tableDataRef.current);
     setTableData(tableDataRef.current);
   }, [props.othersColSpan]);
 
@@ -338,12 +368,29 @@ const FmaTableElement = (props) => {
             {(() => {
               const itemList = [];
               const addColNum = props.othersColSpan - 5;
-              for (let i = 0; i < addColNum; i++) {
+              for (let i = 1; i <= addColNum; i++) {
                 itemList.push(
                   <th
                     style={{ width: "2.5vw" }}
-                    className="edit-color"
+                    className={`selfDefine_${i}`}
                     contentEditable={!props.editable}
+                    // 新增欄位new defect type寫入tableData.otherDf以物件方式儲存
+                    // 儲存格式: { selfDefine_i: { newDefect: '' } }
+                    onBlur={(e) => {
+                      const newDfType = e.target.innerText;
+                      if (newDfType.length > 0) {
+                        const preDefine = `selfDefine_${i}`;
+                        setTableData((prevData) => {
+                          tableDataRef.current = prevData.map((item) => {
+                            let define_obj = item.otherDf;
+                            define_obj[preDefine] = {};
+                            define_obj[preDefine][newDfType] = "";
+                            return { ...item, otherDf: define_obj };
+                          });
+                          return tableDataRef.current;
+                        });
+                      }
+                    }}
                   ></th>
                 );
               }
@@ -366,13 +413,10 @@ const FmaTableElement = (props) => {
           {/* IIF Create default columns */}
           {(() => {
             // const standardRowNum = 5;
-            console.log("123132");
-
             const listItems = [];
             for (let i = 0; i < tableData.length; i++) {
               let row_id = "df-row-";
               row_id = row_id + `${i}`;
-
               listItems.push(
                 <tr className="df-row" key={i} id={row_id}>
                   <td className="item">{i + 1}</td>
@@ -380,7 +424,6 @@ const FmaTableElement = (props) => {
                     className="gid edit-color"
                     suppressContentEditableWarning
                     contentEditable={!props.editable}
-                    // onInput={(e) => (tableData[i].gid = e.target.innerText)}
                     onInput={(e) => {
                       // Save cursor position
                       const selection = window.getSelection();
@@ -592,15 +635,20 @@ const FmaTableElement = (props) => {
                   >
                     {tableData.length > 0 && tableData[i].black}
                   </td>
+                  {/* Glass Data新增defect type欄位 */}
                   {(() => {
                     const itemList = [];
                     const addColNum = props.othersColSpan - 5;
-                    for (let i = 0; i < addColNum; i++) {
+                    for (let col_num = 1; col_num <= addColNum; col_num++) {
                       itemList.push(
                         <td
                           style={{ width: "2.5vw" }}
-                          className="edit-color"
+                          // className="edit-color"
+                          className={`selfDefine_${col_num} edit-color`}
                           contentEditable={!props.editable}
+                          onInput={(e) =>
+                            changeCellValue(e, i, "otherDf", col_num)
+                          }
                         ></td>
                       );
                     }
@@ -611,15 +659,21 @@ const FmaTableElement = (props) => {
                     let itemList = [];
                     tableData.forEach((e, id) => {
                       if (id === i) {
-                        let dfRowArr = [];
+                        // let dfRowArr = [];
                         let dfCount = 0;
                         for (let j = 0; j < props.defectArr.length; j++) {
                           let defType = props.defectArr[j];
-                          defType = defType.replaceAll("-", "");
-                          dfCount += Number(e?.[defType]);
-                          dfRowArr.push(Number(e?.[defType]));
+                          if (j < 24) {
+                            defType = defType?.replaceAll("-", "");
+                            dfCount += Number(e?.[defType]);
+                          } else {
+                            dfCount += Number(
+                              e?.otherDf[`selfDefine_${j - 23}`][
+                                props.defectArr[j]
+                              ]
+                            );
+                          }
                         }
-                        RowArr.push(dfRowArr);
                         itemList.push(
                           <td key={`fma-total-${i}`} className="fma-total">
                             {dfCount}
@@ -679,12 +733,6 @@ const FmaTableElement = (props) => {
                   </td>
                 </tr>
               );
-              if (props.othersColSpan > 5) {
-                const selfDefArr = Object.keys(tableDataRef.current[0]).filter(
-                  (key) => key.startsWith("selfDefine")
-                );
-                console.log(selfDefArr);
-              }
             }
             return listItems;
           })()}
@@ -699,8 +747,9 @@ const FmaTableElement = (props) => {
                 </td>
               );
             })}
+            {/* Total Num計算單枚總和 */}
             {<td className="df-total-all">{sumArr(totalNum)}</td>}
-            {/* <td className="fma-total-sum"></td> */}
+            {/* Avg of s-m-l data */}
             <td className="s-m-l-sum" colSpan={3}>
               Avg.
             </td>
@@ -717,6 +766,7 @@ const FmaTableElement = (props) => {
                 </td>
               );
             })}
+            {/* Avg Num計算單枚總和 */}
             {
               <td className="fma-avg-all">
                 {sumArr(avgNum).toFixed(1).toString()}
@@ -732,6 +782,7 @@ const FmaTableElement = (props) => {
                 </td>
               );
             })}
+            {/* 百分比計算單枚總和 */}
             {
               <td className="df-ratio-all">
                 {(sumArr(ratioNum) * 100).toFixed(0).toString()}

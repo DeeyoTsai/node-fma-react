@@ -14,7 +14,7 @@ import QueryResultComponent from "./components/query-result-component";
 // import "react-calendar/dist/Calendar.css";
 function App() {
   let [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser());
-  const defectArr = [
+  let defectArr = [
     "r-under",
     "g-under",
     "b-under",

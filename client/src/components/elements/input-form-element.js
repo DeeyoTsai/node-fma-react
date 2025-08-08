@@ -46,6 +46,7 @@ const QueryFormComponent = (props) => {
   let [sortedDfArr, setSortedDfArr] = useState([]);
   let [message, setMessage] = useState("");
   let messageRef = useRef(message);
+  let [postContent, setPostContent] = useState("");
 
   const handleEmployee = (e) => {
     props.setEmployee(e.target.value);
@@ -103,8 +104,8 @@ const QueryFormComponent = (props) => {
         { lot }
       );
       try {
-        const outlineData = await fmaService.addOutline(infomData);
-        outlineId = outlineData.data.savedFmaOutline.id;
+        // const outlineData = await fmaService.addOutline(infomData);
+        // outlineId = outlineData.data.savedFmaOutline.id;
       } catch (e) {
         console.log(e);
         outlineSaveErr += e.response.data.msg;
@@ -121,6 +122,8 @@ const QueryFormComponent = (props) => {
         // glass id不為空字串才發送資料
         if (g_id.length > 0) {
           // const item = rowArr[0];
+          console.log(rowArr);
+
           const rowDfCount = rowArr.splice(2, 24).map(Number);
           const rowSml = rowArr.splice(3, 6).map(Number);
           let rowDfCountObj = {};
@@ -156,11 +159,11 @@ const QueryFormComponent = (props) => {
         }
       });
       try {
-        await FmaService.addGlasses(props.employee, glassDataSet);
-        if (messageRef.current === "") {
-          window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");
-          navigate("/fmaquery");
-        }
+        // await FmaService.addGlasses(props.employee, glassDataSet);
+        // if (messageRef.current === "") {
+        //   window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");
+        //   navigate("/fmaquery");
+        // }
       } catch (e) {
         console.log(e);
         // setMessage((prev) => prev + e.response.data.msg);
@@ -172,7 +175,7 @@ const QueryFormComponent = (props) => {
   };
   const handleAddCol = () => {
     setOthersColSpan((othersColSpan += 1));
-    console.log(othersColSpan);
+    // console.log(othersColSpan);
   };
 
   return (
@@ -273,7 +276,10 @@ const QueryFormComponent = (props) => {
             setDfRatioForLine={setDfRatioForLine}
             defectArr={props.defectArr}
           />
-          <FmaTextareaElement />
+          <FmaTextareaElement
+            postContent={postContent}
+            setPostContent={setPostContent}
+          />
         </div>
         <div className="card-footer">
           <div className="d-flex justify-content-center m-1">
