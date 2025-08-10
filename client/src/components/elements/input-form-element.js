@@ -85,7 +85,7 @@ const QueryFormComponent = (props) => {
       } else {
         place.forEach((e, i) => {
           let contain =
-            sortedDfArr[i] + "-" + dfRatioForLine[i].toFixed(1) + "%";
+            sortedDfArr[i] + "-" + (dfRatioForLine[i] * 100).toFixed(0) + "%";
           // const key = e;
           Object.assign(infomData, { [e]: contain });
         });
@@ -104,6 +104,8 @@ const QueryFormComponent = (props) => {
         { lot }
       );
       try {
+        console.log(infomData);
+
         // const outlineData = await fmaService.addOutline(infomData);
         // outlineId = outlineData.data.savedFmaOutline.id;
       } catch (e) {
@@ -122,10 +124,12 @@ const QueryFormComponent = (props) => {
         // glass id不為空字串才發送資料
         if (g_id.length > 0) {
           // const item = rowArr[0];
-          console.log(rowArr);
+          // console.log(rowArr);
 
-          const rowDfCount = rowArr.splice(2, 24).map(Number);
-          const rowSml = rowArr.splice(3, 6).map(Number);
+          const rowDfCount = rowArr
+            .splice(2, props.defectArr.length)
+            .map(Number);
+          const rowSml = rowArr.splice(3, 4).map(Number);
           let rowDfCountObj = {};
           let rowSmlObj = {};
           props.defectArr.map((e, i) => {
@@ -135,6 +139,9 @@ const QueryFormComponent = (props) => {
           sheetCol.map((e, i) => {
             rowSmlObj[e] = rowSml[i];
           });
+          console.log(rowDfCountObj);
+          console.log(sheetCol);
+
           // 移除沒有數值的defect column
           const rmZero = (item) =>
             Object.keys(item)

@@ -1,7 +1,7 @@
 module.exports = {
   HOST: "localhost",
   USER: "deeyo",
-  PASSWORD: "deeyo3834",
+  PASSWORD: "deeyo0312",
   DB: "node-fma",
   dialect: "mysql",
   timezone: "+08:00",
