@@ -45,6 +45,9 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    comment: {
+      type: DataTypes.TEXT,
+    },
   });
   return outline;
 };

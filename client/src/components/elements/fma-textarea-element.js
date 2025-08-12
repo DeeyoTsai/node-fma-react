@@ -7,8 +7,7 @@ const FmaTextareaElement = ({ postContent, setPostContent }) => {
         className="form-control mt-3"
         placeholder="Leave a comment here"
         id="floatingTextarea2"
-        style={{ height: "100px" }}
-        // defaultValue="點數超規進行fma"
+        style={{ height: "150px" }}
         value={postContent}
         onChange={(e) => setPostContent(e.target.value)}
       ></textarea>

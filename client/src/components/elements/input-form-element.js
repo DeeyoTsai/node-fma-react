@@ -10,32 +10,32 @@ import FmaTextareaElement from "./fma-textarea-element";
 
 const QueryFormComponent = (props) => {
   const navigate = useNavigate();
-  // const defectArr = [
-  //   "r-under",
-  //   "g-under",
-  //   "b-under",
-  //   "bm-wp",
-  //   "r-wp",
-  //   "g-wp",
-  //   "b-wp",
-  //   "r-gel",
-  //   "g-gel",
-  //   "b-gel",
-  //   "r-dev-abnormal",
-  //   "g-dev-abnormal",
-  //   "b-dev-abnormal",
-  //   "r-fiber",
-  //   "g-fiber",
-  //   "b-fiber",
-  //   "bp",
-  //   "bm-dirty",
-  //   "repair",
-  //   "above-p",
-  //   "back-dirty",
-  //   "dirty",
-  //   "oven-drop",
-  //   "black",
-  // ];
+  const oriDbDefect = [
+    "runder",
+    "gunder",
+    "bunder",
+    "bmwp",
+    "rwp",
+    "gwp",
+    "bwp",
+    "rgel",
+    "ggel",
+    "bgel",
+    "rdevabnormal",
+    "gdevabnormal",
+    "bdevabnormal",
+    "rfiber",
+    "gfiber",
+    "bfiber",
+    "bp",
+    "bmdirty",
+    "repair",
+    "abovep",
+    "backdirty",
+    "dirty",
+    "ovendrop",
+    "black",
+  ];
 
   let [standardRowNum, setStandardRowNum] = useState(5);
   let [othersColSpan, setOthersColSpan] = useState(5);
@@ -46,7 +46,12 @@ const QueryFormComponent = (props) => {
   let [sortedDfArr, setSortedDfArr] = useState([]);
   let [message, setMessage] = useState("");
   let messageRef = useRef(message);
-  let [postContent, setPostContent] = useState("");
+  let [postContent, setPostContent] = useState(`<調查結果整理>
+  1.{Line}}-{{Product}點數超過管制線，進行 ADI review 5枚，平均總點數約{Avg.}點，結果如下:
+  2.主要Defect為
+  (1) {Defect_1}  佔{ratio_1}%-->{action_1}
+  (2) {Defect_2}  佔{ratio_2}%-->{action_2}
+  (3) {Defect_3}  佔{ratio_3}%-->{action_3}`);
 
   const handleEmployee = (e) => {
     props.setEmployee(e.target.value);
@@ -101,13 +106,14 @@ const QueryFormComponent = (props) => {
         { emp: props.employee },
         { line: props.line },
         { product: props.product },
+        { comment: postContent },
         { lot }
       );
       try {
         console.log(infomData);
 
-        // const outlineData = await fmaService.addOutline(infomData);
-        // outlineId = outlineData.data.savedFmaOutline.id;
+        const outlineData = await fmaService.addOutline(infomData);
+        outlineId = outlineData.data.savedFmaOutline.id;
       } catch (e) {
         console.log(e);
         outlineSaveErr += e.response.data.msg;
@@ -117,31 +123,41 @@ const QueryFormComponent = (props) => {
       // 送出fma table寫資料
       fmaTable.forEach((dfRow) => {
         let rowArr = [];
+        let otherDefectArr = [];
         dfRow.childNodes.forEach((e) => {
           rowArr.push(e.innerText);
         });
         let g_id = rowArr[1];
         // glass id不為空字串才發送資料
         if (g_id.length > 0) {
-          // const item = rowArr[0];
-          // console.log(rowArr);
-
           const rowDfCount = rowArr
             .splice(2, props.defectArr.length)
             .map(Number);
-          const rowSml = rowArr.splice(3, 4).map(Number);
+
+          const rowSml = rowArr.splice(-5, 3).map(Number);
           let rowDfCountObj = {};
+          rowDfCountObj.otherDf = otherDefectArr;
           let rowSmlObj = {};
           props.defectArr.map((e, i) => {
             e = e.split("-").join("");
-            rowDfCountObj[e] = rowDfCount[i];
+            // 有訓練過的defect，以物件方式儲存
+            if (oriDbDefect.includes(e)) {
+              // console.log(11);
+              rowDfCountObj[e] = rowDfCount[i];
+              //新增的defect，以array包object方式儲存
+            } else {
+              // console.log(22);
+              const newDfObj = { [e]: rowDfCount[i] };
+              // rowDfCount.otherDf[e] = rowDfCount[i];
+              otherDefectArr.push(newDfObj);
+            }
           });
+          // 新增defect array轉string for data儲存
+          rowDfCountObj.otherDf = JSON.stringify(otherDefectArr);
+
           sheetCol.map((e, i) => {
             rowSmlObj[e] = rowSml[i];
           });
-          console.log(rowDfCountObj);
-          console.log(sheetCol);
-
           // 移除沒有數值的defect column
           const rmZero = (item) =>
             Object.keys(item)
@@ -165,7 +181,10 @@ const QueryFormComponent = (props) => {
           glassDataSet.push(rowData);
         }
       });
+
       try {
+        console.log(glassDataSet);
+
         // await FmaService.addGlasses(props.employee, glassDataSet);
         // if (messageRef.current === "") {
         //   window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");

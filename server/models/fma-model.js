@@ -121,9 +121,9 @@ module.exports = (sequelize, Sequelize) => {
     l: {
       type: DataTypes.SMALLINT.UNSIGNED,
     },
-    // dfsum: {
-    //   type: DataTypes.SMALLINT.UNSIGNED,
-    // },
+    otherdf: {
+      type: DataTypes.STRING,
+    },
   });
   return fmatb;
 };

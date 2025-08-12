@@ -35,6 +35,7 @@ router.post("/fmaOutline", async (req, res) => {
       second: outlineData.second,
       third: outlineData.third,
       datetime: outlineData.datetime,
+      comment: outlineData.comment,
     });
     return res.send({
       msg: "Outline data儲存成功",
