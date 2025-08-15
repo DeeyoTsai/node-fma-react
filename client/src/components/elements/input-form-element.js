@@ -38,7 +38,7 @@ const QueryFormComponent = (props) => {
   ];
 
   let [standardRowNum, setStandardRowNum] = useState(5);
-  let [othersColSpan, setOthersColSpan] = useState(5);
+  // let [othersColSpan, setOthersColSpan] = useState(5);
   // For barChart --> all Total Num data
   let [dfAvgForBar, setDfAvgForBar] = useState([]);
   // For lineChart --> all Avg Num data
@@ -136,7 +136,7 @@ const QueryFormComponent = (props) => {
 
           const rowSml = rowArr.splice(-5, 3).map(Number);
           let rowDfCountObj = {};
-          rowDfCountObj.otherDf = otherDefectArr;
+          rowDfCountObj.otherdf = otherDefectArr;
           let rowSmlObj = {};
           props.defectArr.map((e, i) => {
             e = e.split("-").join("");
@@ -153,7 +153,7 @@ const QueryFormComponent = (props) => {
             }
           });
           // 新增defect array轉string for data儲存
-          rowDfCountObj.otherDf = JSON.stringify(otherDefectArr);
+          // rowDfCountObj.otherDf = JSON.stringify(otherDefectArr);
 
           sheetCol.map((e, i) => {
             rowSmlObj[e] = rowSml[i];
@@ -185,11 +185,11 @@ const QueryFormComponent = (props) => {
       try {
         console.log(glassDataSet);
 
-        // await FmaService.addGlasses(props.employee, glassDataSet);
-        // if (messageRef.current === "") {
-        //   window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");
-        //   navigate("/fmaquery");
-        // }
+        await FmaService.addGlasses(props.employee, glassDataSet);
+        if (messageRef.current === "") {
+          window.alert("FMA資料儲存成功，將重新導向回查詢頁面!!");
+          // navigate("/fmaquery");
+        }
       } catch (e) {
         console.log(e);
         // setMessage((prev) => prev + e.response.data.msg);
@@ -200,7 +200,7 @@ const QueryFormComponent = (props) => {
     }
   };
   const handleAddCol = () => {
-    setOthersColSpan((othersColSpan += 1));
+    props.setOthersColSpan(props.othersColSpan + 1);
     // console.log(othersColSpan);
   };
 
@@ -294,8 +294,8 @@ const QueryFormComponent = (props) => {
             setProduct={props.setProduct}
             standardRowNum={standardRowNum}
             setStandardRowNum={setStandardRowNum}
-            othersColSpan={othersColSpan}
-            setOthersColSpan={setOthersColSpan}
+            othersColSpan={props.othersColSpan}
+            setOthersColSpan={props.setOthersColSpan}
             dfAvgForBar={dfAvgForBar}
             setDfAvgForBar={setDfAvgForBar}
             dfRatioForLine={dfRatioForLine}

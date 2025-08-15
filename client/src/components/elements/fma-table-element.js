@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 // import { IconName } from "react-icons/bs";
 import { FaErlang, FaTrashAlt } from "react-icons/fa";
 import "../css/fma-table-element.css";
+import { collapseClasses } from "@mui/material";
 // import { data } from "react-router-dom";
 
 const FmaTableElement = (props) => {
@@ -17,7 +18,7 @@ const FmaTableElement = (props) => {
   initObj["createdAt"] = "";
   initObj["updatedAt"] = "";
   initObj["outlineId"] = "";
-  initObj["otherDf"] = {};
+  initObj["otherdf"] = {};
 
   const initTableData = () => {
     let initArr = [];
@@ -37,15 +38,14 @@ const FmaTableElement = (props) => {
   const [avgNum, setAvgNum] = useState([]);
   const [ratioNum, setRatioNum] = useState([]);
   const [accRatioNum, setAccRatioNum] = useState([]);
-
   let [tableData, setTableData] = useState(initTableData);
   let tableDataRef = useRef(tableData);
+  // console.log(tableDataRef.current);
 
-  const tableKeys = Object.keys(tableDataRef.current[0]);
-  const removeDash = props.defectArr.map((x) => x?.replaceAll("-", ""));
+  // const tableKeys = Object.keys(tableDataRef.current[0]);
+  // const removeDash = props.defectArr.map((x) => x?.replaceAll("-", ""));
   // 取出tableData keys，除了defect type以外的欄位
-  const different = tableKeys.filter((x) => !removeDash.includes(x));
-
+  // const different = tableKeys.filter((x) => !removeDash.includes(x));
   let savedPosRef = useRef(null);
 
   const handleRowDelete = (e) => {
@@ -148,7 +148,9 @@ const FmaTableElement = (props) => {
         ).toString().length;
       }
     }
-    if (dfType !== "otherDf") {
+    if (dfType !== "otherdf") {
+      console.log(123);
+
       setTableData((prevData) => {
         tableDataRef.current = prevData.map((item, index) =>
           index === i ? { ...item, [dfType]: Number(e.target.innerText) } : item
@@ -164,8 +166,8 @@ const FmaTableElement = (props) => {
             // let cpObj = { ...item };
             // 嵌套物件使用深拷貝
             let cpObj = JSON.parse(JSON.stringify(item));
-            const realDfName = Object.keys(cpObj.otherDf[col_head])[0];
-            cpObj.otherDf[col_head][realDfName] = Number(e.target.innerText);
+            const realDfName = Object.keys(cpObj.otherdf[col_head])[0];
+            cpObj.otherdf[col_head][realDfName] = Number(e.target.innerText);
             return cpObj;
           } else {
             return item;
@@ -196,10 +198,34 @@ const FmaTableElement = (props) => {
   }, [savedPosRef.current]);
 
   useEffect(() => {
+    console.log(props.othersColSpan);
+
     if (props.glassDataSet && tableData.length === 0) {
-      // 僅初始化將glassDataSet帶入TableData
-      setTableData(props.glassDataSet);
-      tableDataRef.current = props.glassDataSet;
+      // console.log(props.glassDataSet[0].otherdf.length);
+      const addCol = props.glassDataSet[0].otherdf;
+      if (addCol.length > 0) {
+        props.setOthersColSpan(props.othersColSpan + addCol.length);
+      }
+      console.log(props.othersColSpan);
+      // 僅初始化將glassDataSet帶入TableDat
+      tableDataRef.current = props.glassDataSet.map((e, i) => {
+        let addColArr = {};
+        for (let col_n = 0; col_n < addCol.length; col_n++) {
+          const define_name = `selfDefine_${col_n + 1}`;
+          const define_obj = { [define_name]: e.otherdf[col_n] };
+          addColArr = { ...addColArr, ...define_obj };
+        }
+        // console.log(addColArr);
+        e.otherdf = addColArr;
+        return e;
+      });
+
+      setTableData(tableDataRef.current);
+      // tableDataRef.current = props.glassDataSet;
+      // setTableData(props.glassDataSet);
+
+      console.log(tableDataRef.current);
+
       // 重設tableData id編號
       setTableData((prev) => {
         // 重設tableData id編號
@@ -218,7 +244,24 @@ const FmaTableElement = (props) => {
 
     // 處理新增項次
     if (tableDataRef.current.length < props.standardRowNum) {
-      let cpObj = { ...initObj };
+      let cpObj;
+      if (props.othersColSpan > 5) {
+        let addColNum = props.othersColSpan - 5;
+        let addColArr = {};
+        let define_obj;
+        for (let col_n = 0; col_n < addColNum; col_n++) {
+          const define_name = `selfDefine_${col_n + 1}`;
+          let real_df_obj = {};
+          real_df_obj[props.defectArr[24 + col_n]] = "";
+          define_obj = { [define_name]: real_df_obj };
+          addColArr = { ...addColArr, ...define_obj };
+        }
+        // console.log(addColArr);
+        cpObj = { ...initObj, otherdf: addColArr };
+      } else {
+        cpObj = { ...initObj };
+      }
+
       cpObj.id = tableDataRef.current.length;
       tableDataRef.current.push(cpObj);
       setTableData(tableDataRef.current);
@@ -231,9 +274,9 @@ const FmaTableElement = (props) => {
     let accRatioNumArr = [];
     let defectTypeArr = [];
     // 新增defect欄位存入defectTypeArr array
-    if (props.othersColSpan > 5) {
-      console.log(Object.values(tableDataRef.current[0].otherDf));
-      Object.values(tableDataRef.current[0].otherDf).map((e) => {
+    if (props.othersColSpan > 5 && tableDataRef.current.length > 0) {
+      // console.log(Object.values(tableDataRef.current[0]));
+      Object.values(tableDataRef.current[0].otherdf).map((e) => {
         defectTypeArr.push(Object.keys(e)[0]);
         if (
           !props.defectArr.includes(Object.keys(e)[0]) &&
@@ -250,13 +293,13 @@ const FmaTableElement = (props) => {
       let dfType = props.defectArr[j];
       for (let i = 0; i < tableDataRef.current.length; i++) {
         if (j < 24) {
-          console.log(props.defectArr.length);
+          // console.log(props.defectArr.length);
           dfType = dfType.replaceAll("-", "");
           dfSum += Number(tableDataRef.current[i][dfType]);
         } else {
           // 計算新增欄位的total Num、Avg Num
           dfSum += Number(
-            tableDataRef.current[i].otherDf[`selfDefine_${j - 23}`][
+            tableDataRef.current[i].otherdf[`selfDefine_${j - 23}`][
               props.defectArr[j]
             ]
           );
@@ -293,13 +336,19 @@ const FmaTableElement = (props) => {
 
   // 新增欄位
   useEffect(() => {
-    for (let i = 0; i < tableDataRef.current.length; i++) {
-      if (props.othersColSpan > 5) {
-        const defaultColName = "selfDefine_" + (props.othersColSpan - 5);
-        tableDataRef.current[i]["otherDf"][defaultColName] = {};
+    console.log(22222);
+
+    if (!props.glassDataSet) {
+      for (let i = 0; i < tableDataRef.current.length; i++) {
+        if (props.othersColSpan > 5) {
+          const defaultColName = "selfDefine_" + (props.othersColSpan - 5);
+          tableDataRef.current[i]["otherdf"][defaultColName] = {};
+        }
       }
+      setTableData(tableDataRef.current);
+      console.log(1111);
+      console.log(tableDataRef.current);
     }
-    setTableData(tableDataRef.current);
   }, [props.othersColSpan]);
 
   return (
@@ -371,27 +420,35 @@ const FmaTableElement = (props) => {
               for (let i = 1; i <= addColNum; i++) {
                 itemList.push(
                   <th
+                    key={`add-col-td-${i}`}
                     style={{ width: "2.5vw" }}
                     className={`selfDefine_${i}`}
                     contentEditable={!props.editable}
-                    // 新增欄位new defect type寫入tableData.otherDf以物件方式儲存
+                    suppressContentEditableWarning
+                    // 新增欄位new defect type寫入tableData.otherdf以物件方式儲存
                     // 儲存格式: { selfDefine_i: { newDefect: '' } }
+                    // values={
+                    //   props.defectArr.length > 24 ? props.defectArr[24 + i] : ""
+                    // }
+                    // defaultValue={props.defectArr[24 + i - 1]}
                     onBlur={(e) => {
                       const newDfType = e.target.innerText;
                       if (newDfType.length > 0) {
                         const preDefine = `selfDefine_${i}`;
                         setTableData((prevData) => {
                           tableDataRef.current = prevData.map((item) => {
-                            let define_obj = item.otherDf;
+                            let define_obj = item.otherdf;
                             define_obj[preDefine] = {};
                             define_obj[preDefine][newDfType] = "";
-                            return { ...item, otherDf: define_obj };
+                            return { ...item, otherdf: define_obj };
                           });
                           return tableDataRef.current;
                         });
                       }
                     }}
-                  ></th>
+                  >
+                    {props.defectArr.length > 24 && props.defectArr[24 + i - 1]}
+                  </th>
                 );
               }
               return itemList;
@@ -642,14 +699,23 @@ const FmaTableElement = (props) => {
                     for (let col_num = 1; col_num <= addColNum; col_num++) {
                       itemList.push(
                         <td
+                          key={`add-col-td-${i}-${col_num}`}
                           style={{ width: "2.5vw" }}
                           // className="edit-color"
                           className={`selfDefine_${col_num} edit-color`}
                           contentEditable={!props.editable}
+                          suppressContentEditableWarning
                           onInput={(e) =>
-                            changeCellValue(e, i, "otherDf", col_num)
+                            changeCellValue(e, i, "otherdf", col_num)
                           }
-                        ></td>
+                        >
+                          {props.othersColSpan > 5 &&
+                            Object.keys(tableData[i].otherdf).length > 0 &&
+                            tableData[i].otherdf[`selfDefine_${col_num}`] &&
+                            tableData[i].otherdf[`selfDefine_${col_num}`][
+                              props.defectArr[24 + col_num - 1]
+                            ]}
+                        </td>
                       );
                     }
                     return itemList;
@@ -668,7 +734,7 @@ const FmaTableElement = (props) => {
                             dfCount += Number(e?.[defType]);
                           } else {
                             dfCount += Number(
-                              e?.otherDf[`selfDefine_${j - 23}`][
+                              e?.otherdf[`selfDefine_${j - 23}`][
                                 props.defectArr[j]
                               ]
                             );

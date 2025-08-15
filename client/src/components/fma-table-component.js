@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import InputFormElement from "./elements/input-form-element";
 // import FmaTableElement from "./elements/fma-table-element";
-const FmaTableComponent = ({ currentUser, setCurrentUser, defectArr }) => {
+const FmaTableComponent = ({
+  currentUser,
+  setCurrentUser,
+  defectArr,
+  othersColSpan,
+  setOthersColSpan,
+}) => {
   const title = "FMA填寫表格";
   // const btnValue = "送出表單";
   //======FMA填寫表格======
@@ -36,6 +42,8 @@ const FmaTableComponent = ({ currentUser, setCurrentUser, defectArr }) => {
         product={product}
         setProduct={setProduct}
         defectArr={defectArr}
+        othersColSpan={othersColSpan}
+        setOthersColSpan={setOthersColSpan}
       />
       {/* <FmaTableElement /> */}
     </div>

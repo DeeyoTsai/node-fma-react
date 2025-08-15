@@ -14,6 +14,7 @@ import QueryResultComponent from "./components/query-result-component";
 // import "react-calendar/dist/Calendar.css";
 function App() {
   let [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser());
+  let [othersColSpan, setOthersColSpan] = useState(5);
   let defectArr = [
     "r-under",
     "g-under",
@@ -85,6 +86,8 @@ function App() {
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
                 defectArr={defectArr}
+                othersColSpan={othersColSpan}
+                setOthersColSpan={setOthersColSpan}
               />
             }
           />
@@ -95,6 +98,8 @@ function App() {
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
                 defectArr={defectArr}
+                othersColSpan={othersColSpan}
+                setOthersColSpan={setOthersColSpan}
               />
             }
           />

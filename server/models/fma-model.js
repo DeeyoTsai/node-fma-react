@@ -122,7 +122,17 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.SMALLINT.UNSIGNED,
     },
     otherdf: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
+      defaultValue: "[]", // Optional: Set a default empty array
+      get() {
+        // Getter to parse the JSON string back into an array
+        const rawValue = this.getDataValue("otherdf");
+        return rawValue ? JSON.parse(rawValue) : [];
+      },
+      set(value) {
+        // Setter to stringify the array into JSON before saving
+        this.setDataValue("otherdf", JSON.stringify(value));
+      },
     },
   });
   return fmatb;

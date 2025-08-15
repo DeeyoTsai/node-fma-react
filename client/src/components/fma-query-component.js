@@ -54,6 +54,8 @@ const FmaQueryComponent = () => {
   };
   const handleCheckEdit = (e) => {
     const id = e.currentTarget.parentElement.parentElement.parentElement.id;
+    console.log(id);
+
     navigate("/queryResult", {
       state: { rowData: JSON.stringify(rowdata), id: id },
     });

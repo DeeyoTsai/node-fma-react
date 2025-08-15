@@ -49,6 +49,7 @@ const QueryResultComponent = (props) => {
 
   const handleBackQuery = () => {
     // console.log(rowData);
+    props.setOthersColSpan(5);
     navigate("/fmaquery", {
       state: { rowData: rowData },
     });
@@ -79,7 +80,6 @@ const QueryResultComponent = (props) => {
     fetchOutlineData();
     fetchFmatbData();
   }, []);
-
   return (
     <div>
       {/* {JSON.stringify(props.currentUser)} */}
@@ -218,6 +218,8 @@ const QueryResultComponent = (props) => {
               setProduct={setProduct}
               standardRowNum={standardRowNum}
               setStandardRowNum={setStandardRowNum}
+              othersColSpan={props.othersColSpan}
+              setOthersColSpan={props.setOthersColSpan}
               dfAvgForBar={dfAvgForBar}
               setDfAvgForBar={setDfAvgForBar}
               dfRatioForLine={dfRatioForLine}
