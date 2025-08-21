@@ -5,6 +5,7 @@ const FmaTableComponent = ({
   currentUser,
   setCurrentUser,
   defectArr,
+  setDefectArr,
   othersColSpan,
   setOthersColSpan,
 }) => {
@@ -15,7 +16,9 @@ const FmaTableComponent = ({
   const currentDate = new Date().toLocaleDateString("sv");
   // const currentDateTime = new Date().toLocaleString("sv");
 
-  let [employee, setEmployee] = useState(currentUser.user.employee);
+  let [employee, setEmployee] = useState(
+    currentUser.user.employee ? currentUser.user.employee : ""
+  );
   let [pickdate, setPickdate] = useState(currentDate);
   let [line, setLine] = useState("");
   let [product, setProduct] = useState("");
@@ -42,6 +45,7 @@ const FmaTableComponent = ({
         product={product}
         setProduct={setProduct}
         defectArr={defectArr}
+        setDefectArr={setDefectArr}
         othersColSpan={othersColSpan}
         setOthersColSpan={setOthersColSpan}
       />

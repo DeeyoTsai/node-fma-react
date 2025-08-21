@@ -1,7 +1,8 @@
+// import "react-calendar/dist/Calendar.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "react-calendar/dist/Calendar.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "./components/Layout";
 import HomeComponent from "./components/home-component";
 import RegisterComponent from "./components/register-component";
@@ -15,7 +16,33 @@ import QueryResultComponent from "./components/query-result-component";
 function App() {
   let [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser());
   let [othersColSpan, setOthersColSpan] = useState(5);
-  let defectArr = [
+  // let defectArr = [
+  //   "r-under",
+  //   "g-under",
+  //   "b-under",
+  //   "bm-wp",
+  //   "r-wp",
+  //   "g-wp",
+  //   "b-wp",
+  //   "r-gel",
+  //   "g-gel",
+  //   "b-gel",
+  //   "r-dev-abnormal",
+  //   "g-dev-abnormal",
+  //   "b-dev-abnormal",
+  //   "r-fiber",
+  //   "g-fiber",
+  //   "b-fiber",
+  //   "bp",
+  //   "bm-dirty",
+  //   "repair",
+  //   "above-p",
+  //   "back-dirty",
+  //   "dirty",
+  //   "oven-drop",
+  //   "black",
+  // ];
+  let [defectArr, setDefectArr] = useState([
     "r-under",
     "g-under",
     "b-under",
@@ -40,14 +67,22 @@ function App() {
     "dirty",
     "oven-drop",
     "black",
-  ];
+  ]);
+
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path="/"
           element={
-            <Layout currentUser={currentUser} setCurrentUser={setCurrentUser} />
+            <Layout
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
+              othersColSpan={othersColSpan}
+              setOthersColSpan={setOthersColSpan}
+              defectArr={defectArr}
+              setDefectArr={setDefectArr}
+            />
           }
         >
           <Route index element={<HomeComponent />} />
@@ -86,6 +121,7 @@ function App() {
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
                 defectArr={defectArr}
+                setDefectArr={setDefectArr}
                 othersColSpan={othersColSpan}
                 setOthersColSpan={setOthersColSpan}
               />
@@ -98,6 +134,7 @@ function App() {
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
                 defectArr={defectArr}
+                setDefectArr={setDefectArr}
                 othersColSpan={othersColSpan}
                 setOthersColSpan={setOthersColSpan}
               />

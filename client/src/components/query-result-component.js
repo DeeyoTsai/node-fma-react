@@ -49,7 +49,7 @@ const QueryResultComponent = (props) => {
 
   const handleBackQuery = () => {
     // console.log(rowData);
-    props.setOthersColSpan(5);
+    // props.setOthersColSpan(5);
     navigate("/fmaquery", {
       state: { rowData: rowData },
     });
@@ -225,6 +225,7 @@ const QueryResultComponent = (props) => {
               dfRatioForLine={dfRatioForLine}
               setDfRatioForLine={setDfRatioForLine}
               defectArr={props.defectArr}
+              setDefectArr={props.setDefectArr}
               glassDataSet={glassDataSet}
               setGlassDataSet={setGlassDataSet}
               editable={isReadyOnly}

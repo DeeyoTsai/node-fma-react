@@ -46,6 +46,7 @@ const QueryFormComponent = (props) => {
   let [sortedDfArr, setSortedDfArr] = useState([]);
   let [message, setMessage] = useState("");
   let messageRef = useRef(message);
+  let [isReadyOnly, setIsReadyOnly] = useState(false);
   let [postContent, setPostContent] = useState(`<調查結果整理>
   1.{Line}}-{{Product}點數超過管制線，進行 ADI review 5枚，平均總點數約{Avg.}點，結果如下:
   2.主要Defect為
@@ -301,6 +302,8 @@ const QueryFormComponent = (props) => {
             dfRatioForLine={dfRatioForLine}
             setDfRatioForLine={setDfRatioForLine}
             defectArr={props.defectArr}
+            setDefectArr={props.setDefectArr}
+            editable={isReadyOnly}
           />
           <FmaTextareaElement
             postContent={postContent}

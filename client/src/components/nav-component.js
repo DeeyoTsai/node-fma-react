@@ -3,12 +3,25 @@ import { Link } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import "./css/nav-component.css";
 
-const NavComponent = ({ currentUser, setCurrentUser }) => {
+const NavComponent = ({
+  currentUser,
+  setCurrentUser,
+  othersColSpan,
+  setOthersColSpan,
+  defectArr,
+  setDefectArr,
+}) => {
   const handleLogout = () => {
     AuthService.logout();
     window.alert("登出成功!現在您會被導向到登入畫面~");
     setCurrentUser(null);
   };
+
+  const handleClear = () => {
+    setDefectArr(defectArr.slice(0, 24));
+    setOthersColSpan(5);
+  };
+
   return (
     <div>
       <nav>
@@ -77,7 +90,11 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
                 )}
                 {currentUser && (
                   <li className="nav-item me-2">
-                    <Link className="nav-link" to="/fmatable">
+                    <Link
+                      className="nav-link"
+                      to="/fmatable"
+                      onClick={handleClear}
+                    >
                       <h5>FMA填寫表格</h5>
                     </Link>
                   </li>

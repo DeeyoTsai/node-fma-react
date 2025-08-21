@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/auth.service";
-import userImage from "./images/user.png";
+import userImage from "./images/profile.gif";
 
 const LoginComponent = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();

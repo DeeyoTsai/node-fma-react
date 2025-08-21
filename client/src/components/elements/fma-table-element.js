@@ -1,17 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-// import { IconName } from "react-icons/bs";
-import { FaErlang, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import "../css/fma-table-element.css";
-import { collapseClasses } from "@mui/material";
-// import { data } from "react-router-dom";
+// import { collapseClasses } from "@mui/material";
 
-const FmaTableElement = (props) => {
+const FmaTableElement = ({
+  product,
+  editable,
+  defectArr,
+  setDefectArr,
+  standardRowNum,
+  setStandardRowNum,
+  glassDataSet,
+  setGlassDataSet,
+  othersColSpan,
+  setOthersColSpan,
+  setDfRatioForLine,
+  setDfAvgForBar,
+}) => {
   let initObj = {
     id: "",
     date: "",
     gid: "",
   };
-  props.defectArr.map((e, i) => (initObj[e?.replaceAll("-", "")] = ""));
+
+  defectArr.slice(0, 24).map((e, i) => (initObj[e?.replaceAll("-", "")] = ""));
   initObj["s"] = "";
   initObj["m"] = "";
   initObj["l"] = "";
@@ -22,12 +34,14 @@ const FmaTableElement = (props) => {
 
   const initTableData = () => {
     let initArr = [];
-    for (let i = 0; i < props.standardRowNum; i++) {
+    for (let i = 0; i < standardRowNum; i++) {
       // console.log(Object.keys(initObj).length);
-      let cpObj = { ...initObj };
+      // let cpObj = { ...initObj };
+      let cpObj = JSON.parse(JSON.stringify(initObj));
       cpObj.id = i;
       initArr.push(cpObj);
     }
+
     return initArr;
   };
 
@@ -40,22 +54,21 @@ const FmaTableElement = (props) => {
   const [accRatioNum, setAccRatioNum] = useState([]);
   let [tableData, setTableData] = useState(initTableData);
   let tableDataRef = useRef(tableData);
-  // console.log(tableDataRef.current);
-
   // const tableKeys = Object.keys(tableDataRef.current[0]);
-  // const removeDash = props.defectArr.map((x) => x?.replaceAll("-", ""));
+  // const removeDash = defectArr.map((x) => x?.replaceAll("-", ""));
   // 取出tableData keys，除了defect type以外的欄位
   // const different = tableKeys.filter((x) => !removeDash.includes(x));
   let savedPosRef = useRef(null);
+  // let queryPage = false;
 
   const handleRowDelete = (e) => {
-    console.log(props.standardRowNum);
+    console.log(standardRowNum);
 
-    props.setStandardRowNum((prev) => {
+    setStandardRowNum((prev) => {
       return (prev = prev - 1);
       // console.log(prev);
     });
-    console.log(props.standardRowNum);
+    console.log(standardRowNum);
     const del_row_id = Number(
       e.currentTarget.parentElement.parentElement.id.split("-")[2]
     );
@@ -100,32 +113,19 @@ const FmaTableElement = (props) => {
     return countNotEmptyRows;
   }
 
-  // const calFmaTotal = (item) => {
-  //   // let dfCount = [];
-  //   props.defectArr.map((e, i) => {
-  //     let new_e = e.replaceAll("-", "");
-  //     let contain = tableDataRef.current[item];
-  //     // console.log(contain?.[new_e]);
-  //     if (contain?.[new_e]) {
-  //       dfCount.push(Number(contain?.[new_e]));
-  //     }
-  //   });
-  //   return sumArr(dfCount);
-  // };
-
   // 算sml加總
   const calSmlTotal = (item) => {
     const listItems = [];
     const smlArr = ["s", "m", "l"];
 
-    tableData.map((e, i) => {
+    tableData.forEach((e, i) => {
       if (item === i) {
         let rowCount = 0;
-        smlArr.map((s, i) => {
+        smlArr.forEach((s, i) => {
           rowCount += Number(e?.[s]);
         });
         sheetTotal.push(rowCount);
-        // props.setDfAvgForBar(rowCount);
+        // setDfAvgForBar(rowCount);
         listItems.push(
           <td key={`df-sum-${i}`} className="df-sum">
             {rowCount}
@@ -137,6 +137,7 @@ const FmaTableElement = (props) => {
   };
 
   const changeCellValue = (e, i, dfType, col_n = 0) => {
+    // 保持key in數值時游標位置
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
       if (isNaN(selection.getRangeAt(0).commonAncestorContainer.data)) {
@@ -149,8 +150,6 @@ const FmaTableElement = (props) => {
       }
     }
     if (dfType !== "otherdf") {
-      console.log(123);
-
       setTableData((prevData) => {
         tableDataRef.current = prevData.map((item, index) =>
           index === i ? { ...item, [dfType]: Number(e.target.innerText) } : item
@@ -198,39 +197,31 @@ const FmaTableElement = (props) => {
   }, [savedPosRef.current]);
 
   useEffect(() => {
-    console.log(props.othersColSpan);
-
-    if (props.glassDataSet && tableData.length === 0) {
-      // console.log(props.glassDataSet[0].otherdf.length);
-      const addCol = props.glassDataSet[0].otherdf;
-      if (addCol.length > 0) {
-        props.setOthersColSpan(props.othersColSpan + addCol.length);
+    if (glassDataSet && tableData.length === 0) {
+      const addCol = glassDataSet[0].otherdf;
+      if (addCol.length > 0 && othersColSpan === 5) {
+        setOthersColSpan(othersColSpan + addCol.length);
       }
-      console.log(props.othersColSpan);
+      console.log(othersColSpan);
       // 僅初始化將glassDataSet帶入TableDat
-      tableDataRef.current = props.glassDataSet.map((e, i) => {
+      tableDataRef.current = glassDataSet.map((e, i) => {
         let addColArr = {};
         for (let col_n = 0; col_n < addCol.length; col_n++) {
           const define_name = `selfDefine_${col_n + 1}`;
           const define_obj = { [define_name]: e.otherdf[col_n] };
           addColArr = { ...addColArr, ...define_obj };
         }
-        // console.log(addColArr);
         e.otherdf = addColArr;
         return e;
       });
 
       setTableData(tableDataRef.current);
-      // tableDataRef.current = props.glassDataSet;
-      // setTableData(props.glassDataSet);
-
-      console.log(tableDataRef.current);
 
       // 重設tableData id編號
       setTableData((prev) => {
         // 重設tableData id編號
         tableDataRef.current = prev.map((item, index) => {
-          let cpItem = { ...item };
+          let cpItem = JSON.parse(JSON.stringify(item));
           cpItem.id = index;
           return cpItem;
         });
@@ -238,25 +229,24 @@ const FmaTableElement = (props) => {
       });
     }
     // tableData內資料變更時，回寫glassDataSet，for query網頁資料更新
-    if (props.glassDataSet) {
-      props.setGlassDataSet(tableDataRef.current);
+    if (glassDataSet) {
+      setGlassDataSet(tableDataRef.current);
     }
 
     // 處理新增項次
-    if (tableDataRef.current.length < props.standardRowNum) {
+    if (tableDataRef.current.length < standardRowNum) {
       let cpObj;
-      if (props.othersColSpan > 5) {
-        let addColNum = props.othersColSpan - 5;
+      if (othersColSpan > 5) {
+        let addColNum = othersColSpan - 5;
         let addColArr = {};
         let define_obj;
         for (let col_n = 0; col_n < addColNum; col_n++) {
           const define_name = `selfDefine_${col_n + 1}`;
           let real_df_obj = {};
-          real_df_obj[props.defectArr[24 + col_n]] = "";
+          real_df_obj[defectArr[24 + col_n]] = "";
           define_obj = { [define_name]: real_df_obj };
           addColArr = { ...addColArr, ...define_obj };
         }
-        // console.log(addColArr);
         cpObj = { ...initObj, otherdf: addColArr };
       } else {
         cpObj = { ...initObj };
@@ -274,35 +264,38 @@ const FmaTableElement = (props) => {
     let accRatioNumArr = [];
     let defectTypeArr = [];
     // 新增defect欄位存入defectTypeArr array
-    if (props.othersColSpan > 5 && tableDataRef.current.length > 0) {
+    if (othersColSpan > 5 && tableDataRef.current.length > 0) {
       // console.log(Object.values(tableDataRef.current[0]));
       Object.values(tableDataRef.current[0].otherdf).map((e) => {
         defectTypeArr.push(Object.keys(e)[0]);
         if (
-          !props.defectArr.includes(Object.keys(e)[0]) &&
+          !defectArr.includes(Object.keys(e)[0]) &&
           Object.keys(e)[0] !== undefined
         ) {
-          props.defectArr.push(Object.keys(e)[0]);
+          // defectArr.push(Object.keys(e)[0]);
+          setDefectArr((preValue) => [...preValue, Object.keys(e)[0]]);
         }
       });
     }
 
-    for (let j = 0; j < props.defectArr.length; j++) {
+    for (let j = 0; j < defectArr.length; j++) {
       let dfSum = 0;
       let dfAvg = 0.0;
-      let dfType = props.defectArr[j];
+      let dfType = defectArr[j];
       for (let i = 0; i < tableDataRef.current.length; i++) {
         if (j < 24) {
-          // console.log(props.defectArr.length);
+          // console.log(defectArr.length);
           dfType = dfType.replaceAll("-", "");
           dfSum += Number(tableDataRef.current[i][dfType]);
         } else {
           // 計算新增欄位的total Num、Avg Num
-          dfSum += Number(
-            tableDataRef.current[i].otherdf[`selfDefine_${j - 23}`][
-              props.defectArr[j]
-            ]
-          );
+          if (Object.keys(tableDataRef.current[i].otherdf).length > 0) {
+            dfSum += Number(
+              tableDataRef.current[i].otherdf[`selfDefine_${j - 23}`][
+                defectArr[j]
+              ]
+            );
+          }
         }
         if (getNotEmptyRowLen() > 0) {
           dfAvg = isNaN(dfSum / getNotEmptyRowLen())
@@ -317,39 +310,38 @@ const FmaTableElement = (props) => {
     // set total num row data and avg num row data
     setTotalNum(totalNumArr);
     setAvgNum(avgNumArr);
-    props.setDfAvgForBar([...avgNumArr]);
+    setDfAvgForBar([...avgNumArr]);
     // 設定百分比row data
     let dfRatio;
-    for (let j = 0; j < props.defectArr.length; j++) {
+    for (let j = 0; j < defectArr.length; j++) {
       dfRatio = totalNumArr[j] / sumArr(totalNumArr);
       ratioNumArr.push(dfRatio);
     }
     setRatioNum(ratioNumArr);
-    props.setDfRatioForLine([...ratioNumArr]);
+    setDfRatioForLine([...ratioNumArr]);
     let accRatio = 0.0;
     ratioNumArr.reduce((acc, cur) => {
       accRatio += cur;
       accRatioNumArr.push(accRatio);
     }, 0.0);
     setAccRatioNum(accRatioNumArr);
-  }, [props.glassDataSet, tableData, props.standardRowNum]);
+  }, [glassDataSet, tableData, standardRowNum, othersColSpan]);
 
   // 新增欄位
   useEffect(() => {
-    console.log(22222);
+    console.log(totalNum);
 
-    if (!props.glassDataSet) {
+    if (!glassDataSet) {
       for (let i = 0; i < tableDataRef.current.length; i++) {
-        if (props.othersColSpan > 5) {
-          const defaultColName = "selfDefine_" + (props.othersColSpan - 5);
+        if (othersColSpan > 5) {
+          const defaultColName = "selfDefine_" + (othersColSpan - 5);
           tableDataRef.current[i]["otherdf"][defaultColName] = {};
         }
       }
       setTableData(tableDataRef.current);
-      console.log(1111);
-      console.log(tableDataRef.current);
+      // setTotalNum([...totalNum, 0]);
     }
-  }, [props.othersColSpan]);
+  }, [othersColSpan]);
 
   return (
     <div className="fma-result-input">
@@ -365,9 +357,7 @@ const FmaTableElement = (props) => {
             <th rowSpan="2" style={{ width: "2vw" }}>
               產品/Glass
             </th>
-            <th colSpan={(24 + props.othersColSpan - 5).toString()}>
-              Defect Type
-            </th>
+            <th colSpan={(24 + othersColSpan - 5).toString()}>Defect Type</th>
             <th rowSpan="2">FMA Total</th>
             <th colSpan="4" rowSpan="2" className="df-cal">
               Sheet Data
@@ -380,7 +370,7 @@ const FmaTableElement = (props) => {
             <th colSpan="3">顯像不良</th>
             <th colSpan="3">纖維</th>
             <th colSpan="3">前程</th>
-            <th colSpan={props.othersColSpan.toString()}>其他</th>
+            <th colSpan={othersColSpan.toString()}>其他</th>
           </tr>
           <tr>
             <th
@@ -388,7 +378,7 @@ const FmaTableElement = (props) => {
               style={{ width: "10vw" }}
               className="edit-color"
             >
-              {props.product}
+              {product}
             </th>
             <th style={{ width: "2.5vw" }}>R</th>
             <th style={{ width: "2.5vw" }}>G</th>
@@ -416,21 +406,21 @@ const FmaTableElement = (props) => {
             <th style={{ width: "3.5vw" }}>黑色系</th>
             {(() => {
               const itemList = [];
-              const addColNum = props.othersColSpan - 5;
+              const addColNum = othersColSpan - 5;
               for (let i = 1; i <= addColNum; i++) {
                 itemList.push(
                   <th
                     key={`add-col-td-${i}`}
                     style={{ width: "2.5vw" }}
                     className={`selfDefine_${i}`}
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     suppressContentEditableWarning
                     // 新增欄位new defect type寫入tableData.otherdf以物件方式儲存
                     // 儲存格式: { selfDefine_i: { newDefect: '' } }
                     // values={
-                    //   props.defectArr.length > 24 ? props.defectArr[24 + i] : ""
+                    //   defectArr.length > 24 ? defectArr[24 + i] : ""
                     // }
-                    // defaultValue={props.defectArr[24 + i - 1]}
+                    // defaultValue={defectArr[24 + i - 1]}
                     onBlur={(e) => {
                       const newDfType = e.target.innerText;
                       if (newDfType.length > 0) {
@@ -447,7 +437,7 @@ const FmaTableElement = (props) => {
                       }
                     }}
                   >
-                    {props.defectArr.length > 24 && props.defectArr[24 + i - 1]}
+                    {defectArr.length > 24 && defectArr[24 + i - 1]}
                   </th>
                 );
               }
@@ -480,7 +470,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="gid edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => {
                       // Save cursor position
                       const selection = window.getSelection();
@@ -502,7 +492,7 @@ const FmaTableElement = (props) => {
                     // ref={savedPosRef}
                     className="r-under edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "runder")}
                   >
                     {tableData.length > 0 && tableData[i].runder}
@@ -510,7 +500,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="g-under edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     // onInput={(e) => (tableData[i].gunder = e.target.innerText)}
                     onInput={(e) => changeCellValue(e, i, "gunder")}
                   >
@@ -519,7 +509,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="b-under edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bunder")}
                   >
                     {tableData.length > 0 && tableData[i].bunder}
@@ -527,7 +517,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="bm-wp edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bmwp")}
                   >
                     {tableData.length > 0 && tableData[i].bmwp}
@@ -535,7 +525,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="r-wp edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "rwp")}
                   >
                     {tableData.length > 0 && tableData[i].rwp}
@@ -543,7 +533,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="g-wp edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "gwp")}
                   >
                     {tableData.length > 0 && tableData[i].gwp}
@@ -551,7 +541,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="b-wp edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bwp")}
                   >
                     {tableData.length > 0 && tableData[i].bwp}
@@ -559,7 +549,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="r-gel edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "rgel")}
                   >
                     {tableData.length > 0 && tableData[i].rgel}
@@ -567,7 +557,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="g-gel edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "ggel")}
                   >
                     {tableData.length > 0 && tableData[i].ggel}
@@ -575,7 +565,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="b-gel edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bgel")}
                   >
                     {tableData.length > 0 && tableData[i].bgel}
@@ -583,7 +573,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="r-dev-abnormal edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "rdevabnormal")}
                   >
                     {tableData.length > 0 && tableData[i].rdevabnormal}
@@ -591,7 +581,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="g-dev-abnormal edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "gdevabnormal")}
                   >
                     {tableData.length > 0 && tableData[i].gdevabnormal}
@@ -599,7 +589,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="b-dev-abnormal edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bdevabnormal")}
                   >
                     {tableData.length > 0 && tableData[i].bdevabnormal}
@@ -607,7 +597,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="r-fiber edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "rfiber")}
                   >
                     {tableData.length > 0 && tableData[i].rfiber}
@@ -615,7 +605,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="g-fiber edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "gfiber")}
                   >
                     {tableData.length > 0 && tableData[i].gfiber}
@@ -623,7 +613,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="b-fiber edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bfiber")}
                   >
                     {tableData.length > 0 && tableData[i].bfiber}
@@ -631,7 +621,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="bp edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bp")}
                   >
                     {tableData.length > 0 && tableData[i].bp}
@@ -639,7 +629,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="bm-dirty edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "bmdirty")}
                   >
                     {tableData.length > 0 && tableData[i].bmdirty}
@@ -647,7 +637,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="repair edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "repair")}
                   >
                     {tableData.length > 0 && tableData[i].repair}
@@ -655,7 +645,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="above-p edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "abovep")}
                   >
                     {tableData.length > 0 && tableData[i].abovep}
@@ -663,7 +653,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="back-dirty edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "backdirty")}
                   >
                     {tableData.length > 0 && tableData[i].backdirty}
@@ -671,7 +661,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="dirty edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "dirty")}
                   >
                     {tableData.length > 0 && tableData[i].dirty}
@@ -679,7 +669,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="oven-drop edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "ovendrop")}
                   >
                     {tableData.length > 0 && tableData[i].ovendrop}
@@ -687,7 +677,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="black edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "black")}
                   >
                     {tableData.length > 0 && tableData[i].black}
@@ -695,7 +685,7 @@ const FmaTableElement = (props) => {
                   {/* Glass Data新增defect type欄位 */}
                   {(() => {
                     const itemList = [];
-                    const addColNum = props.othersColSpan - 5;
+                    const addColNum = othersColSpan - 5;
                     for (let col_num = 1; col_num <= addColNum; col_num++) {
                       itemList.push(
                         <td
@@ -703,17 +693,17 @@ const FmaTableElement = (props) => {
                           style={{ width: "2.5vw" }}
                           // className="edit-color"
                           className={`selfDefine_${col_num} edit-color`}
-                          contentEditable={!props.editable}
+                          contentEditable={!editable}
                           suppressContentEditableWarning
                           onInput={(e) =>
                             changeCellValue(e, i, "otherdf", col_num)
                           }
                         >
-                          {props.othersColSpan > 5 &&
+                          {othersColSpan > 5 &&
                             Object.keys(tableData[i].otherdf).length > 0 &&
                             tableData[i].otherdf[`selfDefine_${col_num}`] &&
                             tableData[i].otherdf[`selfDefine_${col_num}`][
-                              props.defectArr[24 + col_num - 1]
+                              defectArr[24 + col_num - 1]
                             ]}
                         </td>
                       );
@@ -727,17 +717,17 @@ const FmaTableElement = (props) => {
                       if (id === i) {
                         // let dfRowArr = [];
                         let dfCount = 0;
-                        for (let j = 0; j < props.defectArr.length; j++) {
-                          let defType = props.defectArr[j];
+                        for (let j = 0; j < defectArr.length; j++) {
+                          let defType = defectArr[j];
                           if (j < 24) {
                             defType = defType?.replaceAll("-", "");
                             dfCount += Number(e?.[defType]);
                           } else {
-                            dfCount += Number(
-                              e?.otherdf[`selfDefine_${j - 23}`][
-                                props.defectArr[j]
-                              ]
-                            );
+                            if (Object.keys(e.otherdf).length > 0) {
+                              dfCount += Number(
+                                e?.otherdf[`selfDefine_${j - 23}`][defectArr[j]]
+                              );
+                            }
                           }
                         }
                         itemList.push(
@@ -752,7 +742,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="s edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "s")}
                   >
                     {tableData.length > 0 && tableData[i].s}
@@ -760,7 +750,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="m edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "m")}
                   >
                     {tableData.length > 0 && tableData[i].m}
@@ -768,7 +758,7 @@ const FmaTableElement = (props) => {
                   <td
                     className="l edit-color"
                     suppressContentEditableWarning
-                    contentEditable={!props.editable}
+                    contentEditable={!editable}
                     onInput={(e) => changeCellValue(e, i, "l")}
                   >
                     {tableData.length > 0 && tableData[i].l}
@@ -785,7 +775,7 @@ const FmaTableElement = (props) => {
                     }}
                   >
                     <button
-                      disabled={props.editable}
+                      disabled={editable}
                       onClick={handleRowDelete}
                       className="trash-button"
                       style={{
